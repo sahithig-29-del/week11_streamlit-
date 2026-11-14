@@ -12,7 +12,7 @@ import streamlit as st
 
 st.set_page_config(
 page_title="Titanic PostgreSQL Learning App",
-page_icon="",
+page_icon="🚢",
 layout="wide"
 )
 
@@ -33,6 +33,20 @@ def get_db_config():
     """
 
     try:
+        if "PGHOST" in st.secrets:
+            config = {
+                "host": st.secrets["PGHOST"],
+                "port": int(st.secrets.get("PGPORT", 5432)),
+                "dbname": st.secrets["PGDATABASE"],
+                "user": st.secrets["PGUSER"],
+                "password": st.secrets["PGPASSWORD"],
+            }
+
+            if "PGSSLMODE" in st.secrets:
+                config["sslmode"] = st.secrets["PGSSLMODE"]
+
+            return config
+
         db = st.secrets["db"]
 
         config = {
@@ -405,7 +419,7 @@ with explorer_tab:
 
             query = """
             SELECT
-            passenger_id,
+            passengerid,
             name,
             sex,
             age,
@@ -422,7 +436,7 @@ with explorer_tab:
             pclass = ANY(%s)
             AND sex = ANY(%s)
             AND survived = ANY(%s)
-            ORDER BY passenger_id
+            ORDER BY passengerid
             LIMIT %s
             """
 
@@ -546,14 +560,14 @@ with sql_tab:
 
     "Passengers with missing ages": """
     SELECT
-    passenger_id,
+    passengerid,
     name,
     sex,
     age,
     pclass
     FROM titanic_project.passengers
     WHERE age IS NULL
-    ORDER BY passenger_id
+    ORDER BY passengerid
     LIMIT 50
     """,
 
